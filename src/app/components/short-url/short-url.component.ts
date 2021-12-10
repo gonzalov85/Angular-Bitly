@@ -12,26 +12,62 @@ export class ShortUrlComponent implements OnInit {
   urlShort: string;
   urlProcesada: boolean;
   loading: boolean;
+  mostrarError: boolean;
+  textError: string;
 
   constructor(private _shortUrlService: ShortUrlService) {
     this.nombreUrl = '';
     this.urlShort = '';
     this.urlProcesada = false;
     this.loading = false;
+    this.mostrarError = false;
+    this.textError = '';
    }
 
   ngOnInit(): void {
   }
 
   procesarUrl() {
+
+    //validar si la url es vacía
+    if (this.nombreUrl  === '') {
+      this.error('Por favor ingrese una URL');
+
+      return;
+    }
+
     this.urlProcesada = false;
     this.loading = true;
+
+    setTimeout(() => {
+      this.obtenerUrlShort();
+    },1000)
+
+    
+  }
+
+  obtenerUrlShort() {
     this._shortUrlService.getUrlShort(this.nombreUrl).subscribe(data=>{
       this. loading = false;
       this.urlProcesada = true;
       this.urlShort = data.link;
-
+    }, error =>{
+      this.loading = false;
+      this.nombreUrl = '';
+      if(error.error.description === 'The value provided is invalid.'){
+        this.error('La URL ingresada es invalida')
+      }
+      
     })
-  }
 
+  }
+  error(valor: string){
+    this.mostrarError = true;
+      this.textError = 'Por favor ingrese una URL válida';
+
+    //Mostramos error por 4 segundos
+      setTimeout(() => {
+        this.mostrarError = false;
+      }, 4000);
+  }
 }
